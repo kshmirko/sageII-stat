@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar 24 11:17:25 2014
+статистика озоновых профилей относительно положения тропопаузы.
 
 @author: kshmirko
 """
 
 import pandas as pds
 import numpy as np
+import sys
+import pylab as plt
 
 def seasons(x):
+    """
+    Фильтр данных по принадлежности к сезону.
+    """
     month = x.month
     ret = None
     if month in [12,1,2]:
@@ -25,6 +31,7 @@ def seasons(x):
 Lon0 = 131.9
 Lat0 = 43.1
 Radius = 4.0
+
 DB = 'DS-%5.1f-%4.1f-%3.1f.h5'%(Lon0, Lat0, Radius)
 O3StatFileName = 'O3-%5.1f-%4.1f-%3.1f.pdf'%(Lon0, Lat0, Radius)
 
@@ -33,11 +40,44 @@ O3_Err = pds.read_hdf(DB,'O3Err')
 TH = pds.read_hdf(DB,'TH')
 
 
-#вычисляем статистику по сезонам относительно земли
-O3seasons = O3.groupby(seasons).mean().T / 1.0e12
-O3seasons_c = O3.groupby(seasons).count().T
+# вычисляем сезонную стстистику относительно тропопаузы
+
+O3seasons = O3.groupby(seasons)
+O3seasons_c = O3.groupby(seasons)
 O3seasons_Err = O3_Err.groupby(seasons).mean().T / 100.00
-THseasons = TH.groupby(seasons).agg([np.mean, np.std]).T
+THseasons = TH.groupby(seasons)
+
+X = np.linspace(0.5, 70, 140) # actual altitudes
+nX= np.linspace(-5,35,81) # new altitudes
+
+
+o3mean = pds.DataFrame(index=nX, columns=['Winter','Spring','Summer','Fall'])
+o3mean_err = pds.DataFrame(index=nX, columns=['Winter','Spring','Summer','Fall'])
+
+for iseason in ['Winter','Spring','Summer','Fall']:
+    idx = THseasons.groups[iseason]
+    O3tmp = O3.ix[idx]
+    O3Err = O3_Err.ix[idx]
+    THtmp = TH.ix[idx]
+    no3tmp = pds.DataFrame(index=nX,columns=O3tmp.index)
+    no3errtmp = pds.DataFrame(index=nX,columns=O3tmp.index)
+    print(len(O3tmp),THtmp.values[0,0])
+    for i in range(len(THtmp)):
+        tmpX = X-THtmp.values[i]
+        tmpY = O3tmp.values[i]
+        notnan = ~np.isnan(tmpY)
+        no3tmp[idx[i]] = np.interp(nX, tmpX[notnan], tmpY[notnan],left=np.nan, right=np.nan)
+        
+        tmpY = O3Err.values[i]
+        notnan = ~np.isnan(tmpY)
+        no3errtmp[idx[i]] = np.interp(nX, tmpX[notnan], tmpY[notnan],left=np.nan, right=np.nan)
+#        print(no3tmp[idx[i]])
+    o3mean[iseason] = no3tmp.T.mean()
+    o3mean_err[iseason] = no3tmp.T.std()
+    plt.plot(nX, o3mean[iseason]/1e12, nX, o3mean_err[iseason]/1e12)
+plt.legend(['Winter','Spring','Summer','Fall'])
+plt.show()
+sys.exit()
 
 import pylab as plt
 
