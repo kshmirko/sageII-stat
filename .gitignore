@@ -34,3 +34,11 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+## images
+*.ps
+*.pdf
+*.jpg
+*.png
+*.eps
+
