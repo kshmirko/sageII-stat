@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar 24 11:17:25 2014
@@ -26,7 +27,9 @@ Lon0 = 131.9
 Lat0 = 43.1
 Radius = 4.0
 DB = 'DS-%5.1f-%4.1f-%3.1f.h5'%(Lon0, Lat0, Radius)
-O3StatFileName = 'O3-%5.1f-%4.1f-%3.1f.pdf'%(Lon0, Lat0, Radius)
+O3StatFileName_fig = 'O3-%5.1f-%4.1f-%3.1f.eps'%(Lon0, Lat0, Radius)
+O3StatFileName_h5 = 'O3-%5.1f-%4.1f-%3.1f.h5'%(Lon0, Lat0, Radius)
+
 
 O3 = pds.read_hdf(DB,'O3')
 O3_Err = pds.read_hdf(DB,'O3Err')
@@ -35,13 +38,27 @@ TH = pds.read_hdf(DB,'TH')
 
 #вычисляем статистику по сезонам относительно земли
 O3seasons = O3.groupby(seasons).mean().T / 1.0e12
-O3seasons_c = O3.groupby(seasons).count().T
+O3seasons_s = O3.groupby(seasons).std().T / 1.0e12
 O3seasons_Err = O3_Err.groupby(seasons).mean().T / 100.00
 THseasons = TH.groupby(seasons).agg([np.mean, np.std]).T
 
+X = np.linspace(0.5, 70, 140)
+
+StatO3 = pds.DataFrame(index=X)
+
+for iseason in ['Winter','Spring','Summer','Fall']:
+    
+    StatO3[iseason+'_m'] = O3seasons[iseason]
+    StatO3[iseason+'_e'] = O3seasons_Err[iseason]
+    StatO3[iseason+'_s'] = O3seasons_s[iseason]
+
+store = pds.HDFStore(O3StatFileName_h5,'w')
+store.put('Statistics',StatO3)
+store.close()
+
 import pylab as plt
 
-X = np.linspace(0.5, 70, 140)
+
 plt.figure(1)
 plt.clf()
 ax = plt.subplot(2,2,1)
@@ -149,4 +166,4 @@ ax2.set_ylabel('Error,$\%$')
 ax2.tick_params(axis='y', colors='red')
 ax2.set_ylim((0,100))
 
-plt.savefig(O3StatFileName)
+plt.savefig(O3StatFileName_fig)

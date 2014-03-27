@@ -59,14 +59,15 @@ Df_Ext1020_Err = pds.DataFrame(Ext1020_Err, index=Tp)
 
 
 H5FileName = 'DS-%5.1f-%4.1f-%3.1f.h5'%(Lon0, Lat0, Radius)
+H5FileName1 = 'DT-%5.1f-%4.1f-%3.1f.h5'%(Lon0, Lat0, Radius)
 
 Df_O3.to_hdf(H5FileName,'O3',append=True)
 Df_O3_Err.to_hdf(H5FileName,'O3Err',append=True)
 Df_TH.to_hdf(H5FileName,'TH',append=True)
 Df_Ext386.to_hdf(H5FileName,'Ext386',append=True)
-Df_Ext452.to_hdf(H5FileName,'Ext386',append=True)
-Df_Ext525.to_hdf(H5FileName,'Ext386',append=True)
-Df_Ext1020.to_hdf(H5FileName,'Ext386',append=True)
+Df_Ext452.to_hdf(H5FileName,'Ext452',append=True)
+Df_Ext525.to_hdf(H5FileName,'Ext525',append=True)
+Df_Ext1020.to_hdf(H5FileName,'Ext1020',append=True)
 Df_Ext386_Err.to_hdf(H5FileName,'Ext386_Err',append=True)
 Df_Ext452_Err.to_hdf(H5FileName,'Ext452_Err',append=True)
 Df_Ext525_Err.to_hdf(H5FileName,'Ext525_Err',append=True)
