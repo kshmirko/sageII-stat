@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar 24 09:28:16 2014
@@ -10,7 +11,8 @@ import numpy as np
 DB = '../sage-reader/data/SAGE-II-6.20.nc'
 Lon0 = 131.9
 Lat0 = 43.1
-Radius = 4
+print('Station location: Lon = %5.2f\tLat = %5.2f\n'%(Lon0, Lat0))
+Radius = float(input('Enter radius to search profiles:> '))
 Radius2 = Radius**2
 
 F=nc.Dataset(DB,'r')
